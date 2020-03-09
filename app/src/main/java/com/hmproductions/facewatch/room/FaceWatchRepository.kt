@@ -6,8 +6,13 @@ import okhttp3.MultipartBody
 
 class FaceWatchRepository {
 
-    fun identifyFace(client: FaceWatchClient, token: String, image: MultipartBody.Part): Person {
+    fun identifyFace(client: FaceWatchClient, token: String, image: MultipartBody.Part): Person? {
         val result = client.identifyFace(token, image).execute()
-        return Person(result.body()?.name ?: "", result.body()?.roll_no ?: "")
+
+        return if (result.isSuccessful) {
+            Person(result.body()?.name ?: "", result.body()?.roll_no ?: "")
+        } else {
+            null
+        }
     }
 }

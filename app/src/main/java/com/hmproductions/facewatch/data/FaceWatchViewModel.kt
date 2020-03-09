@@ -8,8 +8,14 @@ import okhttp3.MultipartBody
 class FaceWatchViewModel : ViewModel() {
 
     private val repository: FaceWatchRepository = FaceWatchRepository()
+    var token: String? = null
 
-    fun identifyFace(client: FaceWatchClient, token: String, image: MultipartBody.Part) {
-        repository.identifyFace(client, token, image)
+    fun identifyFace(client: FaceWatchClient, image: MultipartBody.Part): Person? {
+        val tempToken = token
+        return if (tempToken == null) {
+            null
+        } else {
+            repository.identifyFace(client, tempToken, image)
+        }
     }
 }
