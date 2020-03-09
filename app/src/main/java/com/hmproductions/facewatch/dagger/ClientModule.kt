@@ -14,13 +14,13 @@ class ClientModule {
 
     @Provides
     @FaceWatchApplicationScope
-    fun getDataMallRetrofit(interceptor: HttpLoggingInterceptor): Retrofit =
+    fun getFaceWatchRetrofit(interceptor: HttpLoggingInterceptor): Retrofit =
         Retrofit.Builder().addConverterFactory(GsonConverterFactory.create())
             .client(getOkHttpClient(interceptor)).baseUrl(FACENET_API_BASE_URL).build()
 
     @Provides
     @FaceWatchApplicationScope
-    fun getDataMallRetrofitClient(retrofit: Retrofit): FaceWatchClient = retrofit.create(
+    fun getFaceWatchRetrofitClient(retrofit: Retrofit): FaceWatchClient = retrofit.create(
         FaceWatchClient::class.java
     )
 
