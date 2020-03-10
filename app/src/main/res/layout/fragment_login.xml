@@ -38,7 +38,7 @@
             android:ems="14"
             android:hint="@string/email"
             android:inputType="textEmailAddress"
-            android:text="harshmahajan927@gmail.com"
+            android:text="preethirakshap@gmail.com"
             android:textColor="@color/neutral_font_color"
             android:textSize="16sp" />
 

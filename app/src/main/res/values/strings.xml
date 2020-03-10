@@ -11,4 +11,10 @@
     <string name="password">Password</string>
     <string name="no_faces_to_recognize">No faces to recognize</string>
     <string name="signing_in">Signing In…</string>
+    <string name="uploading_image">Uploading image…</string>
+    <string name="admin">Admin</string>
+    <string name="hello_with_comma">Hello, </string>
+    <string name="number_of_photos_uploaded">Number of photos uploaded: </string>
+    <string name="tap_either_button_to_upload">Tap either button to upload photo via Camera or upload existing photo from gallery.</string>
+    <string name="logout">Logout</string>
 </resources>

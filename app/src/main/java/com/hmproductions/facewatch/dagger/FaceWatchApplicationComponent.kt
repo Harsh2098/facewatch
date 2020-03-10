@@ -1,5 +1,6 @@
 package com.hmproductions.facewatch.dagger
 
+import com.hmproductions.facewatch.fragment.AdminFragment
 import com.hmproductions.facewatch.fragment.HomeFragment
 import com.hmproductions.facewatch.fragment.LoginFragment
 import dagger.Component
@@ -9,5 +10,6 @@ import dagger.Component
 interface FaceWatchApplicationComponent {
 
     fun inject(loginFragment: LoginFragment)
+    fun inject(adminFragment: AdminFragment)
     fun inject(homeFragment: HomeFragment)
 }

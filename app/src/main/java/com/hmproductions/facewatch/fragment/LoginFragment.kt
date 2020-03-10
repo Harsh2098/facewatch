@@ -66,7 +66,11 @@ class LoginFragment : Fragment() {
 
             if (response.statusCode.isSuccessful()) {
                 model.token = response.token
-                findNavController().navigate(R.id.login_successful_action)
+                model.currentPhotosCount = response.currentPhotosCount
+                model.email = emailEditText.text.toString()
+                findNavController().navigate(
+                    if (response.isAdmin) R.id.admin_login_successful_action else R.id.normal_login_successful_action
+                )
             } else {
                 context?.toast(response.statusMessage)
             }

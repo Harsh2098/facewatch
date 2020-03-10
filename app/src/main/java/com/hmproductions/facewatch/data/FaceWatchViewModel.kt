@@ -9,6 +9,8 @@ class FaceWatchViewModel : ViewModel() {
 
     private val repository: FaceWatchRepository = FaceWatchRepository()
     var token: String? = null
+    var currentPhotosCount = 0
+    var email: String? = null
 
     fun identifyFace(client: FaceWatchClient, image: MultipartBody.Part): MutableList<Person> {
         val tempToken = token
@@ -18,8 +20,16 @@ class FaceWatchViewModel : ViewModel() {
             mutableListOf()
     }
 
-    fun login(client: FaceWatchClient, email: String, password: String): GenericResponse {
+    fun uploadImage(client: FaceWatchClient, image: MultipartBody.Part): GenericResponse {
+        val tempToken = token
+        return if (tempToken != null)
+            repository.uploadImage(client, tempToken, image) ?: GenericResponse()
+        else
+            GenericResponse()
+    }
+
+    fun login(client: FaceWatchClient, email: String, password: String): AuthenticationResponse {
         val response = repository.login(client, AuthenticationDetails(email, password, "", ""))
-        return response ?: GenericResponse(500, "Internal server error", "")
+        return response ?: AuthenticationResponse(500, "Internal server error")
     }
 }

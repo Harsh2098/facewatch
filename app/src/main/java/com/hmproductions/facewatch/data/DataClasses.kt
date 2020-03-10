@@ -9,6 +9,9 @@ data class FaceItem(val name: String, val roll_no: String, val email: String)
 
 data class Person(val name: String, val rollNumber: String, val probability: Double)
 
-data class GenericResponse(val statusCode: Int, val statusMessage: String, val token: String)
+data class AuthenticationResponse(val statusCode: Int, val statusMessage: String, val token: String = "",
+                                  val isAdmin: Boolean = false, val currentPhotosCount: Int = 0)
 
 data class AuthenticationDetails(val email: String, val password: String, val roll_no: String, val name: String)
+
+data class GenericResponse(val statusCode: Int = 500, val statusMessage: String = "")

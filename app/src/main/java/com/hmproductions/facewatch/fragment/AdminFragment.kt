@@ -8,21 +8,22 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.view.*
-import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.hmproductions.facewatch.FaceWatchClient
 import com.hmproductions.facewatch.R
+import com.hmproductions.facewatch.adapter.PersonRecyclerAdapter
 import com.hmproductions.facewatch.dagger.ContextModule
 import com.hmproductions.facewatch.dagger.DaggerFaceWatchApplicationComponent
 import com.hmproductions.facewatch.data.FaceWatchViewModel
+import com.hmproductions.facewatch.data.Person
 import com.hmproductions.facewatch.utils.getActualPath
-import com.hmproductions.facewatch.utils.isSuccessful
-import kotlinx.android.synthetic.main.fragment_home.*
+import kotlinx.android.synthetic.main.fragment_admin.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -36,17 +37,19 @@ import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
 
-class HomeFragment : Fragment() {
+class AdminFragment : Fragment(), PersonRecyclerAdapter.PersonClickListener {
 
     @Inject
     lateinit var client: FaceWatchClient
 
     private lateinit var model: FaceWatchViewModel
+    private var personRecyclerAdapter: PersonRecyclerAdapter? = null
     private var loadingDialog: AlertDialog? = null
     private var currentPhotoPath: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        personRecyclerAdapter = PersonRecyclerAdapter(context, null, this)
         model = activity?.run { ViewModelProvider(this).get(FaceWatchViewModel::class.java) }
             ?: throw Exception("Invalid activity")
         setHasOptionsMenu(true)
@@ -54,19 +57,20 @@ class HomeFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         DaggerFaceWatchApplicationComponent.builder().contextModule(ContextModule(context!!)).build().inject(this)
-        return inflater.inflate(R.layout.fragment_home, container, false)
+        return inflater.inflate(R.layout.fragment_admin, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
+        personRecyclerView.adapter = personRecyclerAdapter
+        personRecyclerView.layoutManager = LinearLayoutManager(context)
+        personRecyclerView.setHasFixedSize(false)
+
         val dialogView = LayoutInflater.from(context).inflate(R.layout.progress_dialog, null)
-        (dialogView.findViewById<View>(R.id.progressDialog_textView) as TextView).setText(R.string.uploading_image)
         loadingDialog = AlertDialog.Builder(context!!).setView(dialogView).setCancelable(false).create()
 
         galleryButton.setOnClickListener { pickImageFromGallery() }
         captureButton.setOnClickListener { dispatchTakePictureIntent() }
-        emailTextView.text = model.email
-        photosCountTextView.text = model.currentPhotosCount.toString()
     }
 
     private fun pickImageFromGallery() {
@@ -108,16 +112,16 @@ class HomeFragment : Fragment() {
             GALLERY_REQUEST_CODE -> {
                 val fileUri = data?.data
                 if (fileUri != null)
-                    uploadImageUsingFilePath(getActualPath(context!!, fileUri))
+                    identifyPeopleFromFaces(getActualPath(context!!, fileUri))
             }
 
             REQUEST_IMAGE_CAPTURE -> {
-                uploadImageUsingFilePath(currentPhotoPath)
+                identifyPeopleFromFaces(currentPhotoPath)
             }
         }
     }
 
-    private fun uploadImageUsingFilePath(filePath: String?) = lifecycleScope.launch {
+    private fun identifyPeopleFromFaces(filePath: String?) = lifecycleScope.launch {
 
         if (filePath == null) return@launch
         val file = File(filePath)
@@ -128,15 +132,15 @@ class HomeFragment : Fragment() {
         val image = MultipartBody.Part.createFormData("photo", file.name, requestFile)
 
         loadingDialog?.show()
-        val genericResponse = withContext(Dispatchers.IO) { model.uploadImage(client, image) }
+        val personList = withContext(Dispatchers.IO) { model.identifyFace(client, image) }
         loadingDialog?.dismiss()
 
-        if (genericResponse.statusCode.isSuccessful()) {
-            model.currentPhotosCount++
-            photosCountTextView.text = model.currentPhotosCount.toString()
-        } else {
-            context?.toast(genericResponse.statusMessage)
-        }
+        personRecyclerAdapter?.swapData(personList)
+        noFacesToRecognizeTextView.visibility = if (personList.size > 0) View.GONE else View.VISIBLE
+    }
+
+    override fun onPersonClicked(person: Person) {
+        context?.toast("Clicked on ${person.rollNumber}")
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -155,7 +159,7 @@ class HomeFragment : Fragment() {
         model.token = null
         model.currentPhotosCount = 0
         model.email = null
-        findNavController().navigate(R.id.logout_from_normal_action)
+        findNavController().navigate(R.id.logout_from_admin_action)
     }
 
     companion object {

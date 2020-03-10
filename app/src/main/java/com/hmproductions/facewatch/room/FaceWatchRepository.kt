@@ -2,15 +2,18 @@ package com.hmproductions.facewatch.room
 
 import com.hmproductions.facewatch.FaceWatchClient
 import com.hmproductions.facewatch.data.AuthenticationDetails
+import com.hmproductions.facewatch.data.AuthenticationResponse
 import com.hmproductions.facewatch.data.GenericResponse
 import com.hmproductions.facewatch.data.Person
+import com.hmproductions.facewatch.utils.extractErrorMessage
 import okhttp3.MultipartBody
 
 class FaceWatchRepository {
 
-    fun login(client: FaceWatchClient, authenticationDetails: AuthenticationDetails): GenericResponse? {
+    fun login(client: FaceWatchClient, authenticationDetails: AuthenticationDetails): AuthenticationResponse? {
         val result = client.login(authenticationDetails).execute()
-        return result.body()
+        return if (result.isSuccessful) result.body()
+        else AuthenticationResponse(500, extractErrorMessage(result.errorBody()?.string()))
     }
 
     fun identifyFace(client: FaceWatchClient, token: String, image: MultipartBody.Part): MutableList<Person> {
@@ -27,5 +30,10 @@ class FaceWatchRepository {
         }
 
         return personList
+    }
+
+    fun uploadImage(client: FaceWatchClient, token: String, image: MultipartBody.Part): GenericResponse? {
+        val result = client.uploadImage(token, image).execute()
+        return result.body()
     }
 }
