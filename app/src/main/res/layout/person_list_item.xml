@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="16dp">
+    android:padding="8dp">
 
     <TextView
         android:id="@+id/personNameTextView"
@@ -19,9 +19,21 @@
         android:id="@+id/rollNumberTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:textColor="@android:color/darker_gray"
         android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/divider"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/personNameTextView" />
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:background="@android:color/darker_gray"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/rollNumberTextView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
