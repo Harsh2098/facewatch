@@ -3,5 +3,12 @@
     <string name="home">Home</string>
     <string name="capture_button">capture button</string>
     <string name="gallery_button">gallery button</string>
-    <string name="identifying_faces">Identifying faces...</string>
+    <string name="identifying_faces">Identifying faces…</string>
+    <string name="signup">Signup</string>
+    <string name="login">Login</string>
+    <string name="forgot_password_click_here_to_reset">Forgot password? Click here to reset</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="no_faces_to_recognize">No faces to recognize</string>
+    <string name="signing_in">Signing In…</string>
 </resources>

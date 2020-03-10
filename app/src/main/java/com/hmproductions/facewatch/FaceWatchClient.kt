@@ -1,14 +1,19 @@
 package com.hmproductions.facewatch
 
+import com.hmproductions.facewatch.data.AuthenticationDetails
+import com.hmproductions.facewatch.data.GenericResponse
 import com.hmproductions.facewatch.data.IdentifyFacesResult
 import okhttp3.MultipartBody
 import retrofit2.Call
-import retrofit2.http.Header
-import retrofit2.http.Multipart
-import retrofit2.http.POST
-import retrofit2.http.Part
+import retrofit2.http.*
 
 interface FaceWatchClient {
+
+    @POST("student/login")
+    fun login(@Body authenticationDetails: AuthenticationDetails): Call<GenericResponse>
+
+    @POST("student/signup")
+    fun signUp(@Body authenticationDetails: AuthenticationDetails): Call<GenericResponse>
 
     @Multipart
     @POST("identify")

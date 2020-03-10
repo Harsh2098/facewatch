@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <color name="colorPrimary">#008577</color>
-    <color name="colorPrimaryDark">#00574B</color>
-    <color name="colorAccent">#D81B60</color>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <color name="colorPrimary">#1b1c1e</color>
+    <color name="colorPrimaryDark">#111111</color>
+    <color name="colorAccent">#ffea00</color>
 
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
-    <color name="light_background">#FFFFFF</color>
+    <color name="dark_background">#30303C</color>
+    <color name="neutral_font_color">#FFFFFF</color>
+    <color name="dark_font_color">#000000</color>
+    <color name="box_stroke_color">#FFFFFF</color>
+
+    <color name="mtrl_textinput_default_box_stroke_color" tools:override="true">#fff</color>
+
 </resources>

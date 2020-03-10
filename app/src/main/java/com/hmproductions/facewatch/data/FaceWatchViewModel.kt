@@ -8,7 +8,7 @@ import okhttp3.MultipartBody
 class FaceWatchViewModel : ViewModel() {
 
     private val repository: FaceWatchRepository = FaceWatchRepository()
-    var token: String? = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImhhcnNobWFoYWphbjkyN0BnbWFpbC5jb20iLCJ1c2VySWQiOiI1ZTY1MzljZjQ2NGQ5NjFiYTNkMmNiOTkiLCJhZG1pbiI6dHJ1ZSwiaWF0IjoxNTgzODM4NjY3LCJleHAiOjE1ODM4NDIyNjd9.Ob1UauUfRIO6M4yb3QRgVR_hdHhU8FY3NB8s1uuMUj0"
+    var token: String? = null
 
     fun identifyFace(client: FaceWatchClient, image: MultipartBody.Part): MutableList<Person> {
         val tempToken = token
@@ -16,5 +16,10 @@ class FaceWatchViewModel : ViewModel() {
             repository.identifyFace(client, tempToken, image)
         else
             mutableListOf()
+    }
+
+    fun login(client: FaceWatchClient, email: String, password: String): GenericResponse {
+        val response = repository.login(client, AuthenticationDetails(email, password, "", ""))
+        return response ?: GenericResponse(500, "Internal server error", "")
     }
 }

@@ -17,6 +17,7 @@ import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.hmproductions.facewatch.FaceWatchClient
 import com.hmproductions.facewatch.R
@@ -138,6 +139,7 @@ class HomeFragment : Fragment(), PersonRecyclerAdapter.PersonClickListener {
         loadingDialog?.dismiss()
 
         personRecyclerAdapter?.swapData(personList)
+        noFacesToRecognizeTextView.visibility = if(personList.size > 0) View.GONE else View.VISIBLE
     }
 
     override fun onPersonClicked(person: Person) {
@@ -159,6 +161,11 @@ class HomeFragment : Fragment(), PersonRecyclerAdapter.PersonClickListener {
             result = "Not found"
         }
         return result
+    }
+
+    private fun logout() {
+        model.token = null
+        findNavController().navigate(R.id.logout_action)
     }
 
     companion object {
