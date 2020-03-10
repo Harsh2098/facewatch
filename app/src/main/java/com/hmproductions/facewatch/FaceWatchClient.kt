@@ -1,6 +1,6 @@
 package com.hmproductions.facewatch
 
-import com.hmproductions.facewatch.data.IdentifyFaceResult
+import com.hmproductions.facewatch.data.IdentifyFacesResult
 import okhttp3.MultipartBody
 import retrofit2.Call
 import retrofit2.http.Header
@@ -14,6 +14,6 @@ interface FaceWatchClient {
     @POST("identify")
     fun identifyFace(
         @Header("Authorization") authorization: String,
-        @Part("photo") image: MultipartBody.Part
-    ): Call<IdentifyFaceResult>
+        @Part image: MultipartBody.Part
+    ): Call<IdentifyFacesResult>
 }

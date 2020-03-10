@@ -1,20 +1,19 @@
 package com.hmproductions.facewatch.fragment
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
+import android.database.Cursor
+import android.net.Uri
 import android.os.Bundle
-import android.util.SparseArray
+import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.gms.vision.Frame
-import com.google.android.gms.vision.face.Face
-import com.google.android.gms.vision.face.FaceDetector
 import com.hmproductions.facewatch.FaceWatchClient
 import com.hmproductions.facewatch.R
 import com.hmproductions.facewatch.adapter.PersonRecyclerAdapter
@@ -26,9 +25,16 @@ import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.MediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import java.io.File
 import javax.inject.Inject
 
+
 class HomeFragment : Fragment(), PersonRecyclerAdapter.PersonClickListener {
+
+    private val GALLERY_REQUEST_CODE = 101
 
     @Inject
     lateinit var client: FaceWatchClient
@@ -54,39 +60,57 @@ class HomeFragment : Fragment(), PersonRecyclerAdapter.PersonClickListener {
         personRecyclerView.layoutManager = LinearLayoutManager(context)
         personRecyclerView.setHasFixedSize(false)
 
-        val familyBitmap = BitmapFactory.decodeResource(context?.resources, R.drawable.family)
-
-        val faceDetector = FaceDetector.Builder(context).setTrackingEnabled(false).build()
-        if (!faceDetector.isOperational) {
-            AlertDialog.Builder(context!!).setMessage("Could not set up the face detector!").show()
-            return
-        }
-
-        val frame = Frame.Builder().setBitmap(familyBitmap).build()
-        val faces = faceDetector.detect(frame)
-
-        identifyPeopleFromFaces(faces, familyBitmap)
+        captureButton.setOnClickListener { pickImageFromGallery() }
     }
 
-    private fun identifyPeopleFromFaces(faces: SparseArray<Face>, familyBitmap: Bitmap) = lifecycleScope.launch {
+    private fun pickImageFromGallery() {
+        val intent = Intent(Intent.ACTION_PICK)
+        intent.type = "image/*"
+        intent.putStringArrayListExtra(Intent.EXTRA_MIME_TYPES, arrayListOf("image/jpeg", "image/png"))
+        startActivityForResult(intent, GALLERY_REQUEST_CODE)
+    }
 
-        val personList = mutableListOf<Person>()
-
-        for (i in 0 until faces.size()) {
-            val thisFace = faces.valueAt(i)
-            val x1 = thisFace.position.x.toInt()
-            val y1 = thisFace.position.y.toInt()
-            val currentFaceBitmap = Bitmap.createBitmap(familyBitmap, x1, y1, thisFace.width.toInt(), thisFace.height.toInt())
-
-            val newPerson = withContext(Dispatchers.IO) { model.identifyFace(client, image) }
-
-            if (newPerson != null) personList.add(newPerson)
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (resultCode == Activity.RESULT_OK) when (requestCode) {
+            GALLERY_REQUEST_CODE -> {
+                val fileUri = data?.data
+                if (fileUri != null)
+                    identifyPeopleFromFaces(fileUri)
+            }
         }
+    }
+
+    private fun identifyPeopleFromFaces(uri: Uri) = lifecycleScope.launch {
+
+        val actualPath = getActualPath(context!!, uri) ?: return@launch
+        val file = File(actualPath)
+
+        val requestFile = RequestBody.create(MediaType.parse("image/*"), file)
+        val image = MultipartBody.Part.createFormData("photo", file.name, requestFile)
+
+        val personList = withContext(Dispatchers.IO) { model.identifyFace(client, image) }
 
         personRecyclerAdapter?.swapData(personList)
     }
 
     override fun onPersonClicked(person: Person?) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    private fun getActualPath(context: Context, uri: Uri): String? {
+        var result: String? = null
+        val projection = arrayOf(MediaStore.Images.Media.DATA)
+        val cursor: Cursor? = context.contentResolver.query(uri, projection, null, null, null)
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                val columnIndex: Int = cursor.getColumnIndexOrThrow(projection[0])
+                result = cursor.getString(columnIndex)
+            }
+            cursor.close()
+        }
+        if (result == null) {
+            result = "Not found"
+        }
+        return result
     }
 }
