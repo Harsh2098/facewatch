@@ -6,10 +6,14 @@ import android.content.Intent
 import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.provider.MediaStore
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AlertDialog
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -28,19 +32,23 @@ import kotlinx.coroutines.withContext
 import okhttp3.MediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import org.jetbrains.anko.toast
 import java.io.File
+import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.*
 import javax.inject.Inject
 
 
 class HomeFragment : Fragment(), PersonRecyclerAdapter.PersonClickListener {
-
-    private val GALLERY_REQUEST_CODE = 101
 
     @Inject
     lateinit var client: FaceWatchClient
 
     private lateinit var model: FaceWatchViewModel
     private var personRecyclerAdapter: PersonRecyclerAdapter? = null
+    private var loadingDialog: AlertDialog? = null
+    private var currentPhotoPath: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,7 +68,11 @@ class HomeFragment : Fragment(), PersonRecyclerAdapter.PersonClickListener {
         personRecyclerView.layoutManager = LinearLayoutManager(context)
         personRecyclerView.setHasFixedSize(false)
 
-        captureButton.setOnClickListener { pickImageFromGallery() }
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.progress_dialog, null)
+        loadingDialog = AlertDialog.Builder(context!!).setView(dialogView).setCancelable(false).create()
+
+        galleryButton.setOnClickListener { pickImageFromGallery() }
+        captureButton.setOnClickListener { dispatchTakePictureIntent() }
     }
 
     private fun pickImageFromGallery() {
@@ -70,31 +82,66 @@ class HomeFragment : Fragment(), PersonRecyclerAdapter.PersonClickListener {
         startActivityForResult(intent, GALLERY_REQUEST_CODE)
     }
 
+    private fun dispatchTakePictureIntent() {
+        Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
+            takePictureIntent.resolveActivity(context!!.packageManager)?.also {
+                val photoFile: File? = try {
+                    createImageFile()
+                } catch (ex: IOException) {
+                    null
+                }
+                // Continue only if the File was successfully created
+                photoFile?.also {
+                    val photoURI: Uri = FileProvider.getUriForFile(context!!, "com.hmproductions.facewatch", it)
+                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
+                    startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
+                }
+            }
+        }
+    }
+
+    @Throws(IOException::class)
+    private fun createImageFile(): File {
+        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+        val storageDir: File? = context?.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        return File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir).apply {
+            currentPhotoPath = absolutePath
+        }
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (resultCode == Activity.RESULT_OK) when (requestCode) {
             GALLERY_REQUEST_CODE -> {
                 val fileUri = data?.data
                 if (fileUri != null)
-                    identifyPeopleFromFaces(fileUri)
+                    identifyPeopleFromFaces(getActualPath(context!!, fileUri))
+            }
+
+            REQUEST_IMAGE_CAPTURE -> {
+                identifyPeopleFromFaces(currentPhotoPath)
             }
         }
     }
 
-    private fun identifyPeopleFromFaces(uri: Uri) = lifecycleScope.launch {
+    private fun identifyPeopleFromFaces(filePath: String?) = lifecycleScope.launch {
 
-        val actualPath = getActualPath(context!!, uri) ?: return@launch
-        val file = File(actualPath)
+        if (filePath == null) return@launch
+        val file = File(filePath)
+
+        Log.v(LOG_TAG, "Sending photo from $filePath")
 
         val requestFile = RequestBody.create(MediaType.parse("image/*"), file)
         val image = MultipartBody.Part.createFormData("photo", file.name, requestFile)
 
+        loadingDialog?.show()
         val personList = withContext(Dispatchers.IO) { model.identifyFace(client, image) }
+        loadingDialog?.dismiss()
 
         personRecyclerAdapter?.swapData(personList)
     }
 
-    override fun onPersonClicked(person: Person?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun onPersonClicked(person: Person) {
+        context?.toast("Clicked on ${person.rollNumber}")
     }
 
     private fun getActualPath(context: Context, uri: Uri): String? {
@@ -112,5 +159,11 @@ class HomeFragment : Fragment(), PersonRecyclerAdapter.PersonClickListener {
             result = "Not found"
         }
         return result
+    }
+
+    companion object {
+        private const val GALLERY_REQUEST_CODE = 101
+        private const val REQUEST_IMAGE_CAPTURE = 117
+        private const val LOG_TAG = ":::"
     }
 }

@@ -8,7 +8,7 @@ import okhttp3.MultipartBody
 class FaceWatchViewModel : ViewModel() {
 
     private val repository: FaceWatchRepository = FaceWatchRepository()
-    var token: String? = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImhhcnNobWFoYWphbjkyN0BnbWFpbC5jb20iLCJ1c2VySWQiOiI1ZTY1MzljZjQ2NGQ5NjFiYTNkMmNiOTkiLCJhZG1pbiI6dHJ1ZSwiaWF0IjoxNTgzODE5MzEzLCJleHAiOjE1ODM4MjI5MTN9.DRVK_E4P6UIXsBRwMr1aGe2wl3TrJrwz3skFO9Sk6eQ"
+    var token: String? = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImhhcnNobWFoYWphbjkyN0BnbWFpbC5jb20iLCJ1c2VySWQiOiI1ZTY1MzljZjQ2NGQ5NjFiYTNkMmNiOTkiLCJhZG1pbiI6dHJ1ZSwiaWF0IjoxNTgzODM4NjY3LCJleHAiOjE1ODM4NDIyNjd9.Ob1UauUfRIO6M4yb3QRgVR_hdHhU8FY3NB8s1uuMUj0"
 
     fun identifyFace(client: FaceWatchClient, image: MultipartBody.Part): MutableList<Person> {
         val tempToken = token
