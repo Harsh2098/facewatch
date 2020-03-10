@@ -2,12 +2,14 @@ package com.hmproductions.facewatch.fragment
 
 import android.app.Activity
 import android.content.Intent
+import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.view.*
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
@@ -42,6 +44,9 @@ class AdminFragment : Fragment(), PersonRecyclerAdapter.PersonClickListener {
     @Inject
     lateinit var client: FaceWatchClient
 
+    @Inject
+    lateinit var preferences: SharedPreferences
+
     private lateinit var model: FaceWatchViewModel
     private var personRecyclerAdapter: PersonRecyclerAdapter? = null
     private var loadingDialog: AlertDialog? = null
@@ -71,6 +76,7 @@ class AdminFragment : Fragment(), PersonRecyclerAdapter.PersonClickListener {
 
         galleryButton.setOnClickListener { pickImageFromGallery() }
         captureButton.setOnClickListener { dispatchTakePictureIntent() }
+        trainButton.setOnClickListener { sendTrainModelRequest() }
     }
 
     private fun pickImageFromGallery() {
@@ -96,6 +102,14 @@ class AdminFragment : Fragment(), PersonRecyclerAdapter.PersonClickListener {
                 }
             }
         }
+    }
+
+    private fun sendTrainModelRequest() = lifecycleScope.launch {
+        loadingDialog?.show()
+        (loadingDialog?.findViewById<View>(R.id.progressDialog_textView) as TextView).setText(R.string.training_model)
+        val response = withContext(Dispatchers.IO) { model.trainModel(client) }
+        loadingDialog?.dismiss()
+        noFacesToRecognizeTextView.text = response.statusMessage
     }
 
     @Throws(IOException::class)
@@ -132,11 +146,21 @@ class AdminFragment : Fragment(), PersonRecyclerAdapter.PersonClickListener {
         val image = MultipartBody.Part.createFormData("photo", file.name, requestFile)
 
         loadingDialog?.show()
-        val personList = withContext(Dispatchers.IO) { model.identifyFace(client, image) }
+        if (performRecognitionSwitch.isChecked) {
+            (loadingDialog?.findViewById<View>(R.id.progressDialog_textView) as TextView).setText(
+                R.string.identifying_faces
+            )
+            val personList = withContext(Dispatchers.IO) { model.identifyFace(client, image) }
+            personRecyclerAdapter?.swapData(personList)
+            noFacesToRecognizeTextView.visibility = if (personList.size > 0) View.GONE else View.VISIBLE
+        } else {
+            (loadingDialog?.findViewById<View>(R.id.progressDialog_textView) as TextView).setText(
+                R.string.uploading_image
+            )
+            val response = withContext(Dispatchers.IO) { model.uploadImage(client, image) }
+            context?.toast(response.statusMessage)
+        }
         loadingDialog?.dismiss()
-
-        personRecyclerAdapter?.swapData(personList)
-        noFacesToRecognizeTextView.visibility = if (personList.size > 0) View.GONE else View.VISIBLE
     }
 
     override fun onPersonClicked(person: Person) {
@@ -149,7 +173,7 @@ class AdminFragment : Fragment(), PersonRecyclerAdapter.PersonClickListener {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if(item.itemId == R.id.logout_action) {
+        if (item.itemId == R.id.logout_action) {
             logout()
         }
         return super.onOptionsItemSelected(item)

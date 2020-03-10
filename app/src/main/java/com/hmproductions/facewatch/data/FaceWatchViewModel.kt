@@ -32,4 +32,12 @@ class FaceWatchViewModel : ViewModel() {
         val response = repository.login(client, AuthenticationDetails(email, password, "", ""))
         return response ?: AuthenticationResponse(500, "Internal server error")
     }
+
+    fun trainModel(client: FaceWatchClient): GenericResponse {
+        val tempToken = token
+        return if (tempToken != null)
+            repository.trainModel(client, tempToken) ?: GenericResponse()
+        else
+            GenericResponse()
+    }
 }

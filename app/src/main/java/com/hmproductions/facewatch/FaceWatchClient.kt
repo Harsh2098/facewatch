@@ -22,6 +22,9 @@ interface FaceWatchClient {
         @Header("Authorization") authorization: String, @Part image: MultipartBody.Part
     ): Call<GenericResponse>
 
+    @POST("train")
+    fun trainModel(@Header("Authorization") authorization: String): Call<GenericResponse>
+
     @Multipart
     @POST("identify")
     fun identifyFace(

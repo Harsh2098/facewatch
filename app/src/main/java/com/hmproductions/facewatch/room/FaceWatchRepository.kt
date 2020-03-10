@@ -34,6 +34,13 @@ class FaceWatchRepository {
 
     fun uploadImage(client: FaceWatchClient, token: String, image: MultipartBody.Part): GenericResponse? {
         val result = client.uploadImage(token, image).execute()
-        return result.body()
+        return if (result.isSuccessful) result.body()
+        else GenericResponse(500, extractErrorMessage(result.errorBody()?.string()))
+    }
+
+    fun trainModel(client: FaceWatchClient, token: String): GenericResponse? {
+        val result = client.trainModel(token).execute()
+        return if (result.isSuccessful) result.body()
+        else GenericResponse(500, extractErrorMessage(result.errorBody()?.string()))
     }
 }

@@ -3,17 +3,29 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="8dp"
-    android:background="@color/dark_background">
+    android:background="@color/dark_background"
+    android:padding="8dp">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/personRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@id/galleryButton"
+        app:layout_constraintBottom_toTopOf="@id/performRecognitionSwitch"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/performRecognitionSwitch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:checked="true"
+        android:text="@string/perform_face_recognition"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@id/captureButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <ImageButton
         android:id="@+id/galleryButton"
@@ -36,9 +48,21 @@
         android:layout_margin="24dp"
         android:contentDescription="@string/capture_button"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/trainButton"
         app:layout_constraintStart_toEndOf="@id/galleryButton"
         app:srcCompat="@drawable/camera_icon" />
+
+    <ImageButton
+        android:id="@+id/trainButton"
+        style="@style/Widget.MaterialComponents.Button"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:layout_margin="24dp"
+        android:contentDescription="@string/capture_button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/captureButton"
+        app:srcCompat="@drawable/train_icon" />
 
     <TextView
         android:id="@+id/noFacesToRecognizeTextView"
@@ -47,7 +71,7 @@
         android:text="@string/no_faces_to_recognize"
         android:textColor="@color/neutral_font_color"
         android:textSize="18sp"
-        app:layout_constraintBottom_toTopOf="@id/captureButton"
+        app:layout_constraintBottom_toTopOf="@id/performRecognitionSwitch"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
