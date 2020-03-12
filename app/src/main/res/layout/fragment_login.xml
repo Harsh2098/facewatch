@@ -65,7 +65,7 @@
             android:ems="14"
             android:hint="@string/password"
             android:inputType="textPassword"
-            android:text="abc123"
+            android:text="crispychips"
             android:textColor="@color/neutral_font_color"
             android:textSize="16sp" />
 
