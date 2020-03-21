@@ -12,6 +12,8 @@ data class Person(val name: String, val rollNumber: String, val probability: Dou
 data class AuthenticationResponse(val statusCode: Int, val statusMessage: String, val token: String = "",
                                   val isAdmin: Boolean = false, val currentPhotosCount: Int = 0)
 
-data class AuthenticationDetails(val email: String, val password: String, val roll_no: String, val name: String)
+data class AuthenticationDetails(
+    val email: String, val password: String, val roll_no: String, val name: String, val isAdmin: Boolean
+)
 
 data class GenericResponse(val statusCode: Int = 500, val statusMessage: String = "")

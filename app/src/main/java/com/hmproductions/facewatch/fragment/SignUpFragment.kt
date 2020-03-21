@@ -16,14 +16,14 @@ import com.hmproductions.facewatch.dagger.ContextModule
 import com.hmproductions.facewatch.dagger.DaggerFaceWatchApplicationComponent
 import com.hmproductions.facewatch.data.FaceWatchViewModel
 import com.hmproductions.facewatch.utils.isSuccessful
-import kotlinx.android.synthetic.main.fragment_login.*
+import kotlinx.android.synthetic.main.fragment_signup.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.anko.toast
 import javax.inject.Inject
 
-class LoginFragment : Fragment() {
+class SignUpFragment : Fragment() {
 
     @Inject
     lateinit var client: FaceWatchClient
@@ -39,46 +39,58 @@ class LoginFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         DaggerFaceWatchApplicationComponent.builder().contextModule(ContextModule(context!!)).build().inject(this)
-        return inflater.inflate(R.layout.fragment_login, container, false)
+        return inflater.inflate(R.layout.fragment_signup, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         val dialogView = LayoutInflater.from(context).inflate(R.layout.progress_dialog, null)
-        (dialogView.findViewById<View>(R.id.progressDialog_textView) as TextView).setText(R.string.signing_in)
+        (dialogView.findViewById<View>(R.id.progressDialog_textView) as TextView).setText(R.string.signing_up)
         loadingDialog = AlertDialog.Builder(context!!).setView(dialogView).setCancelable(false).create()
 
-        loginButton.setOnClickListener { onLoginButtonClick() }
-        signUpButton.setOnClickListener { onSignUpButtonClick() }
+        newSignUpButton.setOnClickListener { onNewSignUpButtonClick() }
     }
 
-    private fun onLoginButtonClick() = lifecycleScope.launch {
-        if (emailEditText.text.toString().isBlank()) {
-            emailEditText.error = "Enter a valid email"
-        } else if (passwordEditText.text.toString().isBlank() || passwordEditText.text.toString().length < 6) {
-            passwordEditText.error = "Enter a 6 digit password"
+    private fun onNewSignUpButtonClick() = lifecycleScope.launch {
+        if (newEmailEditText.text.toString().isBlank()) {
+            newEmailEditText.error = "Enter a valid email"
+        } else if (newPasswordEditText.text.toString().isBlank() || newPasswordEditText.text.toString().length < 6) {
+            newPasswordEditText.error = "Enter a 6 digit password"
+        } else if (newNameEditText.text.toString().isBlank()) {
+            newNameEditText.error = "Enter your Name"
+        } else if (newRollNumberEditText.text.toString().isBlank()) {
+            newRollNumberEditText.error = "Enter your Roll Number"
         } else {
+            val isAdmin = userAdmin.isChecked
+
             loadingDialog?.show()
             val response = withContext(Dispatchers.IO) {
-                model.login(client, emailEditText.text.toString(), passwordEditText.text.toString())
+                model.signUp(
+                    client, newEmailEditText.text.toString(), newNameEditText.text.toString(),
+                    newRollNumberEditText.text.toString(), newPasswordEditText.text.toString(), isAdmin
+                )
             }
             loadingDialog?.dismiss()
 
             if (response.statusCode.isSuccessful()) {
-                model.token = response.token
-                model.currentPhotosCount = response.currentPhotosCount
-                model.email = emailEditText.text.toString()
-                findNavController().navigate(
-                    if (response.isAdmin) R.id.admin_login_successful_action else R.id.normal_login_successful_action
-                )
+                showSuccessfulSignUpDialog()
             } else {
                 context?.toast(response.statusMessage)
             }
         }
     }
 
-    private fun onSignUpButtonClick() = lifecycleScope.launch {
-        findNavController().navigate(R.id.signUp_action)
+    private fun showSuccessfulSignUpDialog() {
+        AlertDialog.Builder(context!!)
+            .setTitle("Sign Up Successful")
+            .setMessage("Your new account has been successfully created")
+            .setCancelable(false)
+            .setPositiveButton(getString(R.string.okay)) { _, _ ->
+                findNavController().navigate(
+                    R.id.back_to_signIn_action
+                )
+            }
+            .show()
     }
 }

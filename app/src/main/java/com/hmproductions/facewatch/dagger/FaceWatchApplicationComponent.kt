@@ -4,6 +4,7 @@ import com.hmproductions.facewatch.TrainModelWorker
 import com.hmproductions.facewatch.fragment.AdminFragment
 import com.hmproductions.facewatch.fragment.HomeFragment
 import com.hmproductions.facewatch.fragment.LoginFragment
+import com.hmproductions.facewatch.fragment.SignUpFragment
 import dagger.Component
 
 @FaceWatchApplicationScope
@@ -14,4 +15,5 @@ interface FaceWatchApplicationComponent {
     fun inject(adminFragment: AdminFragment)
     fun inject(homeFragment: HomeFragment)
     fun inject(worker: TrainModelWorker)
+    fun inject(signUpFragment: SignUpFragment)
 }

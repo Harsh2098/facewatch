@@ -23,6 +23,12 @@
             app:popUpTo="@id/login_dest"
             app:popUpToInclusive="true" />
 
+        <action
+            android:id="@+id/signUp_action"
+            app:destination="@+id/signup_dest"
+            app:popUpTo="@+id/login_dest"
+            app:popUpToInclusive="true" />
+
     </fragment>
 
     <fragment
@@ -51,6 +57,19 @@
             app:popUpTo="@id/home_dest"
             app:popUpToInclusive="true" />
 
+    </fragment>
+
+    <fragment
+        android:id="@+id/signup_dest"
+        android:name="com.hmproductions.facewatch.fragment.SignUpFragment"
+        android:label="@string/signup"
+        tools:layout="@layout/fragment_signup">
+
+        <action
+            android:id="@+id/back_to_signIn_action"
+            app:destination="@id/login_dest"
+            app:popUpTo="@id/signup_dest"
+            app:popUpToInclusive="true" />
     </fragment>
 
 </navigation>
