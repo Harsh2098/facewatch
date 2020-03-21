@@ -19,4 +19,6 @@
     <string name="logout">Logout</string>
     <string name="perform_face_recognition">Perform face recognition</string>
     <string name="training_model">Training model…</string>
+    <string name="channel_name">Facewatch default channel</string>
+    <string name="channel_description">Default channel for facewatch notifications</string>
 </resources>

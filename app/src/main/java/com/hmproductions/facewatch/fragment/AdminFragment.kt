@@ -17,13 +17,18 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.workDataOf
 import com.hmproductions.facewatch.FaceWatchClient
 import com.hmproductions.facewatch.R
+import com.hmproductions.facewatch.TrainModelWorker
 import com.hmproductions.facewatch.adapter.PersonRecyclerAdapter
 import com.hmproductions.facewatch.dagger.ContextModule
 import com.hmproductions.facewatch.dagger.DaggerFaceWatchApplicationComponent
 import com.hmproductions.facewatch.data.FaceWatchViewModel
 import com.hmproductions.facewatch.data.Person
+import com.hmproductions.facewatch.utils.Constants.TOKEN_KEY
 import com.hmproductions.facewatch.utils.getActualPath
 import kotlinx.android.synthetic.main.fragment_admin.*
 import kotlinx.coroutines.Dispatchers
@@ -37,6 +42,7 @@ import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class AdminFragment : Fragment(), PersonRecyclerAdapter.PersonClickListener {
@@ -104,12 +110,17 @@ class AdminFragment : Fragment(), PersonRecyclerAdapter.PersonClickListener {
         }
     }
 
-    private fun sendTrainModelRequest() = lifecycleScope.launch {
-        loadingDialog?.show()
-        (loadingDialog?.findViewById<View>(R.id.progressDialog_textView) as TextView).setText(R.string.training_model)
-        val response = withContext(Dispatchers.IO) { model.trainModel(client) }
-        loadingDialog?.dismiss()
-        noFacesToRecognizeTextView.text = response.statusMessage
+    private fun sendTrainModelRequest() {
+
+        val inputData = workDataOf(TOKEN_KEY to model.token)
+
+        val trainModelRequest = OneTimeWorkRequestBuilder<TrainModelWorker>()
+            .setInitialDelay(5, TimeUnit.SECONDS)
+            .setInputData(inputData)
+            .build()
+
+        WorkManager.getInstance(context!!).enqueue(trainModelRequest)
+        context?.toast("Model train request sent")
     }
 
     @Throws(IOException::class)
