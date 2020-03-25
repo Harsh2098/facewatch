@@ -16,6 +16,12 @@ class FaceWatchRepository {
         else AuthenticationResponse(500, extractErrorMessage(result.errorBody()?.string()))
     }
 
+    fun signUp(client: FaceWatchClient, authenticationDetails: AuthenticationDetails): AuthenticationResponse? {
+        val result = client.signUp(authenticationDetails).execute()
+        return if (result.isSuccessful) result.body()
+        else AuthenticationResponse(500, extractErrorMessage(result.errorBody()?.string()))
+    }
+
     fun identifyFace(client: FaceWatchClient, token: String, image: MultipartBody.Part): MutableList<Person> {
         val result = client.identifyFace(token, image).execute()
         val personList = mutableListOf<Person>()

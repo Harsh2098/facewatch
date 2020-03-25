@@ -29,7 +29,15 @@ class FaceWatchViewModel : ViewModel() {
     }
 
     fun login(client: FaceWatchClient, email: String, password: String): AuthenticationResponse {
-        val response = repository.login(client, AuthenticationDetails(email, password, "", ""))
+        val response = repository.login(client, AuthenticationDetails(email, password, "", "", false))
+        return response ?: AuthenticationResponse(500, "Internal server error")
+    }
+
+    fun signUp(
+        client: FaceWatchClient, email: String, name: String,
+        roll_no: String, password: String, isAdmin: Boolean
+    ): AuthenticationResponse {
+        val response = repository.signUp(client, AuthenticationDetails(email, password, roll_no, name, isAdmin))
         return response ?: AuthenticationResponse(500, "Internal server error")
     }
 
