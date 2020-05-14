@@ -7,7 +7,7 @@ data class IdentifyFacesResult(
 
 data class FaceItem(val name: String, val roll_no: String, val email: String)
 
-data class Person(val name: String, val rollNumber: String, val probability: Double)
+data class Person(var name: String, var rollNumber: String, val probability: Double)
 
 data class AuthenticationResponse(val statusCode: Int, val statusMessage: String, val token: String = "",
                                   val isAdmin: Boolean = false, val currentPhotosCount: Int = 0)
@@ -17,3 +17,7 @@ data class AuthenticationDetails(
 )
 
 data class GenericResponse(val statusCode: Int = 500, val statusMessage: String = "")
+
+data class Student(val roll_no: String, val date: String, val course_code: String)
+
+data class AttendanceRequest(val studentList: MutableList<Student>)

@@ -21,7 +21,7 @@ public class PersonRecyclerAdapter extends RecyclerView.Adapter<PersonRecyclerAd
     private PersonClickListener listener;
 
     public interface PersonClickListener {
-        void onPersonClicked(Person person);
+        void onPersonClicked(Person person, int position);
     }
 
     public PersonRecyclerAdapter(Context context, List<Person> personList, PersonClickListener newsItemClickListener) {
@@ -56,6 +56,16 @@ public class PersonRecyclerAdapter extends RecyclerView.Adapter<PersonRecyclerAd
         notifyDataSetChanged();
     }
 
+    public void updateStudentDetails(String name, String rollNo, int position) {
+        personList.get(position).setName(name);
+        personList.get(position).setRollNumber(rollNo);
+        notifyItemChanged(position);
+    }
+
+    public List<Person> getPersonList() {
+        return personList;
+    }
+
     class PersonViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         TextView nameTextView, rollNumberTextView;
@@ -70,7 +80,7 @@ public class PersonRecyclerAdapter extends RecyclerView.Adapter<PersonRecyclerAd
 
         @Override
         public void onClick(View view) {
-            listener.onPersonClicked(personList.get(getAdapterPosition()));
+            listener.onPersonClicked(personList.get(getAdapterPosition()), getAdapterPosition());
         }
     }
 }

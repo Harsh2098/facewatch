@@ -1,10 +1,7 @@
 package com.hmproductions.facewatch.room
 
 import com.hmproductions.facewatch.FaceWatchClient
-import com.hmproductions.facewatch.data.AuthenticationDetails
-import com.hmproductions.facewatch.data.AuthenticationResponse
-import com.hmproductions.facewatch.data.GenericResponse
-import com.hmproductions.facewatch.data.Person
+import com.hmproductions.facewatch.data.*
 import com.hmproductions.facewatch.utils.extractErrorMessage
 import okhttp3.MultipartBody
 
@@ -46,6 +43,12 @@ class FaceWatchRepository {
 
     fun trainModel(client: FaceWatchClient, token: String): GenericResponse? {
         val result = client.trainModel(token).execute()
+        return if (result.isSuccessful) result.body()
+        else GenericResponse(500, extractErrorMessage(result.errorBody()?.string()))
+    }
+
+    fun saveAttendance(client: FaceWatchClient, token: String, studentList: MutableList<Student>): GenericResponse? {
+        val result = client.saveAttendance(token, AttendanceRequest(studentList)).execute()
         return if (result.isSuccessful) result.body()
         else GenericResponse(500, extractErrorMessage(result.errorBody()?.string()))
     }

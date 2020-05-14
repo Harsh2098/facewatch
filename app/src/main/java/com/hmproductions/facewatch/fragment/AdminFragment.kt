@@ -9,6 +9,7 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.view.*
+import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
@@ -28,8 +29,10 @@ import com.hmproductions.facewatch.dagger.ContextModule
 import com.hmproductions.facewatch.dagger.DaggerFaceWatchApplicationComponent
 import com.hmproductions.facewatch.data.FaceWatchViewModel
 import com.hmproductions.facewatch.data.Person
+import com.hmproductions.facewatch.data.Student
 import com.hmproductions.facewatch.utils.Constants.TOKEN_KEY
 import com.hmproductions.facewatch.utils.getActualPath
+import com.hmproductions.facewatch.utils.getDateInISOFormat
 import kotlinx.android.synthetic.main.fragment_admin.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -83,6 +86,7 @@ class AdminFragment : Fragment(), PersonRecyclerAdapter.PersonClickListener {
         galleryButton.setOnClickListener { pickImageFromGallery() }
         captureButton.setOnClickListener { dispatchTakePictureIntent() }
         trainButton.setOnClickListener { sendTrainModelRequest() }
+        saveFab.setOnClickListener { onSaveButtonClick() }
     }
 
     private fun pickImageFromGallery() {
@@ -121,6 +125,43 @@ class AdminFragment : Fragment(), PersonRecyclerAdapter.PersonClickListener {
 
         WorkManager.getInstance(context!!).enqueue(trainModelRequest)
         context?.toast("Model train request sent")
+    }
+
+    private fun onSaveButtonClick() = lifecycleScope.launch {
+        val personList = personRecyclerAdapter?.personList ?: mutableListOf()
+        val studentList = mutableListOf<Student>()
+
+        val customView = layoutInflater.inflate(R.layout.dialog_save, null)
+
+        val courseCodeEditText = customView.findViewById<EditText>(R.id.courseCodeEditText)
+
+        val saveDialog = AlertDialog.Builder(requireContext())
+            .setView(customView)
+            .setTitle("Set course code")
+            .setPositiveButton("Save") { _, _ ->
+                if (courseCodeEditText.text.toString().isBlank()) {
+                    requireContext().toast("Course code missing")
+                } else {
+                    for (person in personList) {
+                        studentList.add(
+                            Student(person.rollNumber, getDateInISOFormat(), courseCodeEditText.text.toString())
+                        )
+                    }
+                    sendSaveRequest(studentList)
+                }
+            }
+            .setNegativeButton("Cancel") { dI, _ -> dI.dismiss() }
+            .setCancelable(true)
+            .create()
+
+        saveDialog.show()
+    }
+
+    private fun sendSaveRequest(studentList: MutableList<Student>) = lifecycleScope.launch {
+        val response = withContext(Dispatchers.IO) {
+            model.saveAttendance(client, studentList)
+        }
+        context?.toast(response.statusMessage)
     }
 
     @Throws(IOException::class)
@@ -162,8 +203,15 @@ class AdminFragment : Fragment(), PersonRecyclerAdapter.PersonClickListener {
                 R.string.identifying_faces
             )
             val personList = withContext(Dispatchers.IO) { model.identifyFace(client, image) }
-            personRecyclerAdapter?.swapData(personList)
-            noFacesToRecognizeTextView.visibility = if (personList.size > 0) View.GONE else View.VISIBLE
+
+            if (personList.isEmpty()) {
+                saveFab.hide()
+                noFacesToRecognizeTextView.visibility = View.VISIBLE
+            } else {
+                personRecyclerAdapter?.swapData(personList)
+                saveFab.show()
+                noFacesToRecognizeTextView.visibility = View.GONE
+            }
         } else {
             (loadingDialog?.findViewById<View>(R.id.progressDialog_textView) as TextView).setText(
                 R.string.uploading_image
@@ -174,8 +222,34 @@ class AdminFragment : Fragment(), PersonRecyclerAdapter.PersonClickListener {
         loadingDialog?.dismiss()
     }
 
-    override fun onPersonClicked(person: Person) {
-        context?.toast("Clicked on ${person.rollNumber}")
+    override fun onPersonClicked(person: Person, position: Int) {
+        val customView = layoutInflater.inflate(R.layout.dialog_edit_student, null)
+
+        val nameEditText = customView.findViewById<EditText>(R.id.nameEditText)
+        nameEditText.setText(person.name)
+
+        val rollNoEditText = customView.findViewById<EditText>(R.id.rollNoEditText)
+        rollNoEditText.setText(person.rollNumber)
+
+        val studentEditorDialog = AlertDialog.Builder(requireContext())
+            .setView(customView)
+            .setTitle("Edit student details")
+            .setPositiveButton("Save") { _, _ ->
+                if (nameEditText.text.toString().isBlank() || rollNoEditText.text.toString().isBlank()) {
+                    requireContext().toast("Please enter name and roll no")
+                    onPersonClicked(person, position)
+                } else {
+                    personRecyclerAdapter?.updateStudentDetails(
+                        nameEditText.text.toString(), rollNoEditText.text.toString(), position
+                    )
+                    requireContext().toast("Student details changed")
+                }
+            }
+            .setNegativeButton("Cancel") { dI, _ -> dI.dismiss() }
+            .setCancelable(true)
+            .create()
+
+        studentEditorDialog.show()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

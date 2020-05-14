@@ -1,9 +1,6 @@
 package com.hmproductions.facewatch
 
-import com.hmproductions.facewatch.data.AuthenticationDetails
-import com.hmproductions.facewatch.data.AuthenticationResponse
-import com.hmproductions.facewatch.data.GenericResponse
-import com.hmproductions.facewatch.data.IdentifyFacesResult
+import com.hmproductions.facewatch.data.*
 import okhttp3.MultipartBody
 import retrofit2.Call
 import retrofit2.http.*
@@ -31,4 +28,7 @@ interface FaceWatchClient {
         @Header("Authorization") authorization: String,
         @Part image: MultipartBody.Part
     ): Call<IdentifyFacesResult>
+
+    @POST("attendence")
+    fun saveAttendance(@Header("Authorization") authorization: String, @Body attendanceRequest: AttendanceRequest): Call<GenericResponse>
 }

@@ -15,6 +15,18 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/saveFab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="32dp"
+        android:scaleType="center"
+        android:src="@drawable/save_icon"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/personRecyclerView"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/performRecognitionSwitch"
         android:layout_width="match_parent"

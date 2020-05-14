@@ -26,7 +26,7 @@ class ClientModule {
     )
 
     private fun getOkHttpClient(interceptor: HttpLoggingInterceptor) =
-        OkHttpClient.Builder().readTimeout(0, TimeUnit.SECONDS).writeTimeout(0, TimeUnit.SECONDS).addInterceptor(interceptor).build()
+        OkHttpClient.Builder().readTimeout(0, TimeUnit.SECONDS).writeTimeout(0, TimeUnit.SECONDS).build()
 
     @Provides
     @FaceWatchApplicationScope

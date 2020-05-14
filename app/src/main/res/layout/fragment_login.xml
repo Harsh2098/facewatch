@@ -39,6 +39,7 @@
             android:ems="14"
             android:hint="@string/email"
             android:inputType="textEmailAddress"
+            android:text="harshmahajan927@yahoo.com"
             android:textColor="@color/neutral_font_color"
             android:textSize="16sp" />
 
@@ -65,6 +66,7 @@
             android:ems="14"
             android:hint="@string/password"
             android:inputType="textPassword"
+            android:text="crispychips"
             android:textColor="@color/neutral_font_color"
             android:textSize="16sp" />
 

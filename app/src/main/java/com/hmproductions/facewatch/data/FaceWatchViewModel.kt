@@ -48,4 +48,12 @@ class FaceWatchViewModel : ViewModel() {
         else
             GenericResponse()
     }
+
+    fun saveAttendance(client: FaceWatchClient, studentList: MutableList<Student>): GenericResponse {
+        val tempToken = token
+        return if (tempToken != null)
+            repository.saveAttendance(client, tempToken, studentList) ?: GenericResponse()
+        else
+            GenericResponse()
+    }
 }
