@@ -29,6 +29,9 @@ interface FaceWatchClient {
         @Part image: MultipartBody.Part
     ): Call<IdentifyFacesResult>
 
+    @GET("attendence")
+    fun getAttendance(@Header("Authorization") authorization: String): Call<AttendanceHistoryResult>
+
     @POST("attendence")
     fun saveAttendance(@Header("Authorization") authorization: String, @Body attendanceRequest: AttendanceRequest): Call<GenericResponse>
 }

@@ -56,4 +56,12 @@ class FaceWatchViewModel : ViewModel() {
         else
             GenericResponse()
     }
+
+    fun getAttendance(client: FaceWatchClient): List<Student> {
+        val tempToken = token
+        return if (tempToken != null)
+            repository.getAttendance(client, tempToken)
+        else
+            mutableListOf()
+    }
 }

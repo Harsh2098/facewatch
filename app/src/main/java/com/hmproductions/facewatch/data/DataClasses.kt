@@ -18,6 +18,8 @@ data class AuthenticationDetails(
 
 data class GenericResponse(val statusCode: Int = 500, val statusMessage: String = "")
 
-data class Student(val roll_no: String, val date: String, val course_code: String)
+data class Student(val roll_no: String, var date: String, val course_code: String)
 
 data class AttendanceRequest(val studentList: MutableList<Student>)
+
+data class AttendanceHistoryResult(val statusCode: Int, val statusMessage: String, val result: List<Student>)

@@ -260,7 +260,10 @@ class AdminFragment : Fragment(), PersonRecyclerAdapter.PersonClickListener {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.logout_action) {
             logout()
+        } else if(item.itemId == R.id.history_action) {
+            findNavController().navigate(R.id.attendance_action)
         }
+
         return super.onOptionsItemSelected(item)
     }
 

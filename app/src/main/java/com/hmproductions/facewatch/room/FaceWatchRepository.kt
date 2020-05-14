@@ -52,4 +52,14 @@ class FaceWatchRepository {
         return if (result.isSuccessful) result.body()
         else GenericResponse(500, extractErrorMessage(result.errorBody()?.string()))
     }
+
+    fun getAttendance(client: FaceWatchClient, token: String): MutableList<Student> {
+        val response = client.getAttendance(token).execute()
+
+        if(response.isSuccessful) {
+            return (response.body()?.result?: mutableListOf()) as MutableList<Student>
+        }
+
+        return mutableListOf()
+    }
 }

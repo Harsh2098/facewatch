@@ -32,10 +32,20 @@ fun getActualPath(context: Context, uri: Uri): String? {
 
 fun extractErrorMessage(jsonString: String?): String {
     if (jsonString == null || jsonString.isBlank() || jsonString.isEmpty()) return "Internal server error"
-    return  Gson().fromJson(jsonString, GenericResponse::class.java).statusMessage
+    return Gson().fromJson(jsonString, GenericResponse::class.java).statusMessage
 }
 
 fun getDateInISOFormat(): String {
     val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.UK)
     return sdf.format(Date(System.currentTimeMillis()))
+}
+
+fun removeLeadingZero(s: String): String {
+    return if (s[0] == '0') s.substring(1) else return s
+}
+
+fun customFormatDate(s: String): String {
+    val formatter = SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS'Z'", Locale.US)
+    val date = formatter.parse(s)
+    return SimpleDateFormat("dd/MM/yy", Locale.US).format(date)
 }

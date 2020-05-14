@@ -43,6 +43,10 @@
             app:popUpTo="@id/admin_dest"
             app:popUpToInclusive="true" />
 
+        <action
+            android:id="@+id/attendance_action"
+            app:destination="@+id/history_dest" />
+
     </fragment>
 
     <fragment
@@ -70,6 +74,13 @@
             app:destination="@id/login_dest"
             app:popUpTo="@id/signup_dest"
             app:popUpToInclusive="true" />
+
     </fragment>
+
+    <fragment
+        android:id="@+id/history_dest"
+        android:name="com.hmproductions.facewatch.fragment.AttendanceFragment"
+        android:label="Attendance History"
+        tools:layout="@layout/fragment_attendance"/>
 
 </navigation>
