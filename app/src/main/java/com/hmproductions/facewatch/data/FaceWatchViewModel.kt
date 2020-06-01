@@ -28,6 +28,14 @@ class FaceWatchViewModel : ViewModel() {
             GenericResponse()
     }
 
+    fun uploadVideo(client: FaceWatchClient, image: MultipartBody.Part): videoResponse {
+        val tempToken = token
+        return if (tempToken != null)
+            repository.uploadVideo(client, tempToken, image) ?: videoResponse()
+        else
+            videoResponse()
+    }
+
     fun login(client: FaceWatchClient, email: String, password: String): AuthenticationResponse {
         val response = repository.login(client, AuthenticationDetails(email, password, "", "", false))
         return response ?: AuthenticationResponse(500, "Internal server error")

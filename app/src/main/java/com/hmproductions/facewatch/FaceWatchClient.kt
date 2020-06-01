@@ -19,6 +19,12 @@ interface FaceWatchClient {
         @Header("Authorization") authorization: String, @Part image: MultipartBody.Part
     ): Call<GenericResponse>
 
+    @Multipart
+    @POST("upload/video")
+    fun uploadVideo(
+        @Header("Authorization") authorization: String, @Part image: MultipartBody.Part
+    ): Call<videoResponse>
+
     @POST("train")
     fun trainModel(@Header("Authorization") authorization: String): Call<GenericResponse>
 

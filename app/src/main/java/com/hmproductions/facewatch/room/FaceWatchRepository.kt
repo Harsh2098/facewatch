@@ -41,6 +41,13 @@ class FaceWatchRepository {
         else GenericResponse(500, extractErrorMessage(result.errorBody()?.string()))
     }
 
+    fun uploadVideo(client: FaceWatchClient, token: String, image: MultipartBody.Part): videoResponse? {
+        val result = client.uploadVideo(token, image).execute()
+        return if (result.isSuccessful) result.body()
+        else videoResponse(500, extractErrorMessage(result.errorBody()?.string()),0)
+    }
+
+
     fun trainModel(client: FaceWatchClient, token: String): GenericResponse? {
         val result = client.trainModel(token).execute()
         return if (result.isSuccessful) result.body()
