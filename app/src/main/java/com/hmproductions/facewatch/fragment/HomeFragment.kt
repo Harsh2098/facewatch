@@ -71,8 +71,8 @@ class HomeFragment : Fragment() {
 
     private fun pickImageFromGallery() {
         val intent = Intent(Intent.ACTION_PICK)
-        intent.type = "image/*"
-        intent.putStringArrayListExtra(Intent.EXTRA_MIME_TYPES, arrayListOf("image/jpeg", "image/png"))
+        intent.type = "image/* video/*"
+        intent.putStringArrayListExtra(Intent.EXTRA_MIME_TYPES, arrayListOf("image/jpeg", "image/png", "video/mp4"))
         startActivityForResult(intent, GALLERY_REQUEST_CODE)
     }
 
@@ -124,18 +124,24 @@ class HomeFragment : Fragment() {
 
         Log.v(LOG_TAG, "Sending photo from $filePath")
 
-        val requestFile = RequestBody.create(MediaType.parse("image/*"), file)
-        val image = MultipartBody.Part.createFormData("photo", file.name, requestFile)
+        val requestFile = RequestBody.create(MediaType.parse("image/* video/*"), file)
+       // val image = MultipartBody.Part.createFormData("photo", file.name, requestFile)
+        val image = MultipartBody.Part.createFormData("video", file.name, requestFile)
+
 
         loadingDialog?.show()
-        val genericResponse = withContext(Dispatchers.IO) { model.uploadImage(client, image) }
+        val videoResponse = withContext(Dispatchers.IO) { model.uploadVideo(client, image) }
         loadingDialog?.dismiss()
 
-        if (genericResponse.statusCode.isSuccessful()) {
-            model.currentPhotosCount++
+        if (videoResponse.statusCode.isSuccessful()) {
+            val numberOfPicsAdded = videoResponse.numberOfSavedImages
+            val message = "Number of Images Saved : $numberOfPicsAdded"
+            context?.toast(message)
+
+            model.currentPhotosCount = model.currentPhotosCount+numberOfPicsAdded
             photosCountTextView.text = model.currentPhotosCount.toString()
         } else {
-            context?.toast(genericResponse.statusMessage)
+            context?.toast(videoResponse.statusMessage)
         }
     }
 
